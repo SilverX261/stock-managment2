@@ -13,7 +13,7 @@ import { salePrimaryLabel, saleConfigSummary, PAYMENT_LABELS } from './types'
 import type { SaleFull } from './types'
 
 const pkr = (n: number) => `PKR ${n.toLocaleString('en-PK')}`
-const CARD: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', padding: 16, cursor: 'pointer', transition: 'box-shadow 150ms' }
+const CARD: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', padding: 16, cursor: 'pointer', transition: 'box-shadow 150ms', width: '100%', boxSizing: 'border-box' }
 
 const SALE_SELECT = `
   *,
@@ -77,7 +77,7 @@ export function SalesList() {
   return (
     <div>
       {sales.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16, width: '100%', boxSizing: 'border-box' }}>
           <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, padding: '12px 16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
             <p style={{ fontSize: 11, color: '#A1A1AA' }}>Total Revenue</p>
             <p style={{ fontSize: 16, fontWeight: 700, color: '#0A0A0A', marginTop: 2 }}>{pkr(totalRevenue)}</p>
@@ -135,8 +135,8 @@ export function SalesList() {
                 style={CARD}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: '#0A0A0A', lineHeight: 1.3 }}>{salePrimaryLabel(sale)}</p>
-                    {configSummary && <p style={{ fontSize: 11, color: '#A1A1AA', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>+ {configSummary}</p>}
+                    <p style={{ fontSize: 13, fontWeight: 600, color: '#0A0A0A', lineHeight: 1.3, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>{salePrimaryLabel(sale)}</p>
+                    {configSummary && <p style={{ fontSize: 11, color: '#A1A1AA', marginTop: 2, overflowWrap: 'break-word', wordBreak: 'normal', whiteSpace: 'normal' }}>+ {configSummary}</p>}
                   </div>
                   <div onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}>
                     <WhatsAppShare sale={sale} size="sm" variant="ghost" label="" />
@@ -146,12 +146,12 @@ export function SalesList() {
                   <span style={{ fontSize: 11, color: '#A1A1AA' }}>{dateStr}</span>
                   <span style={{ backgroundColor: '#F5F2EC', color: '#3F3F46', padding: '1px 8px', borderRadius: 99, fontSize: 10, fontWeight: 600 }}>{PAYMENT_LABELS[sale.payment_type]}</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #F0EEE8' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#A1A1AA' }}>
-                    <User style={{ width: 12, height: 12 }} />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #F0EEE8', flexWrap: 'wrap', gap: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#A1A1AA', minWidth: 0, flex: 1, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                    <User style={{ width: 12, height: 12, flexShrink: 0 }} />
                     {sale.customer?.name ?? 'Walk-in Customer'}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 13 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, flexShrink: 0 }}>
                     <div style={{ textAlign: 'right' }}>
                       <span style={{ fontSize: 10, color: '#A1A1AA', display: 'block' }}>Sell</span>
                       <span style={{ fontWeight: 600 }}>{pkr(sale.total_sell_price)}</span>

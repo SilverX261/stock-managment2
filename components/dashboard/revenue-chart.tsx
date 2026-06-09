@@ -33,7 +33,7 @@ function Tip({ active, payload, label }: {
 
 export function RevenueChart({ data }: { data: DayData[] }) {
   return (
-    <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 20 }}>
+    <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 20, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 14, fontWeight: 700, color: '#0A0A0A' }}>Revenue &amp; Profit</h2>
         <p style={{ fontSize: 12, color: '#A1A1AA', marginTop: 2 }}>Last 7 days</p>

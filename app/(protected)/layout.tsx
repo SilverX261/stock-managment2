@@ -2,7 +2,7 @@ import { AppNav } from '@/components/nav/app-nav'
 
 export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FAFAF8' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#FAFAF8', width: '100%', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* AppNav renders sidebar (desktop) + topbar + bottomnav (mobile) */}
       <AppNav />
 
@@ -17,6 +17,10 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           display:         'flex',
           flexDirection:   'column',
           marginLeft:      240, /* sidebar width — fc-main resets this on mobile */
+          width:           '100%',
+          maxWidth:        '100%',
+          overflowX:       'hidden',
+          boxSizing:       'border-box',
         }}
       >
         {children}

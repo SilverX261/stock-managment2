@@ -158,8 +158,7 @@ export function AppNav() {
         </div>
       </header>
 
-      {/* Mobile top-bar spacer so content doesn't hide under it */}
-      <div className="fc-topbar" style={{ height: 56, flexShrink: 0, width: '100%' }} />
+      {/* No spacer needed — fc-main has padding-top: 56px on mobile via CSS */}
 
       {/* ═══════════════════════════════════════════════════════
           MOBILE BOTTOM NAV  (fc-bottomnav)

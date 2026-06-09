@@ -48,7 +48,7 @@ interface Props {
 
 export function PeriodBarChart({ data, view, onViewChange }: Props) {
   return (
-    <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 16 }}>
+    <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', padding: 16, width: '100%', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
         <h2 style={{ fontSize: 14, fontWeight: 600, color: '#0A0A0A' }}>Revenue &amp; Profit</h2>
         <div style={{ display: 'flex', border: '1px solid #E4E2DC', borderRadius: 8, overflow: 'hidden', fontSize: 12 }}>

@@ -123,30 +123,30 @@ export function ConfigBuilder() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', maxWidth: '100%', overflowX: 'hidden', boxSizing: 'border-box' }}>
       {/* Step indicator */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #F0EEE8', padding: '16px 24px' }}>
+      <div style={{ position: 'sticky', top: 0, zIndex: 10, backgroundColor: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(8px)', borderBottom: '1px solid #F0EEE8', padding: '12px 16px', boxSizing: 'border-box', width: '100%' }}>
         <StepIndicator current={step} />
       </div>
 
       {/* Step heading */}
-      <div style={{ padding: '16px 24px 4px' }}>
+      <div style={{ padding: '12px 16px 4px', boxSizing: 'border-box', width: '100%' }}>
         {step === 1 && <>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A' }}>Select Base Laptop</h2>
-          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2 }}>Choose the laptop this configuration will be built on</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A', wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Select Base Laptop</h2>
+          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Choose the laptop this configuration will be built on</p>
         </>}
         {step === 2 && <>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A' }}>Add Components <span style={{ fontSize: 12, fontWeight: 400, color: '#A1A1AA' }}>(optional)</span></h2>
-          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2 }}>Base: {selectedLaptop?.brand} {selectedLaptop?.model}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A', wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Add Components <span style={{ fontSize: 12, fontWeight: 400, color: '#A1A1AA' }}>(optional)</span></h2>
+          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Base: {selectedLaptop?.brand} {selectedLaptop?.model}</p>
         </>}
         {step === 3 && <>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A' }}>Review &amp; Save</h2>
-          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2 }}>Check everything before saving or selling</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#0A0A0A', wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Review &amp; Save</h2>
+          <p style={{ fontSize: 13, color: '#A1A1AA', marginTop: 2, wordBreak: 'normal', overflowWrap: 'break-word', whiteSpace: 'normal' }}>Check everything before saving or selling</p>
         </>}
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 24px 16px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px 16px', boxSizing: 'border-box', width: '100%' }}>
         {stepContent()}
       </div>
 

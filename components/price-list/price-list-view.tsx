@@ -342,10 +342,10 @@ export function PriceListView() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
       {/* ── Toolbar ──────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', width: '100%', boxSizing: 'border-box' }}>
 
         {/* Search */}
-        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+        <div style={{ position: 'relative', flex: 1, minWidth: 0, width: '100%' }}>
           <Search style={{
             position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)',
             width: 15, height: 15, color: '#A1A1AA',
@@ -384,7 +384,6 @@ export function PriceListView() {
             backgroundColor: '#FFFFFF', border: '1px solid rgba(37,211,102,0.4)',
             color: '#25D366', fontSize: 13, fontWeight: 600, cursor: 'pointer',
             transition: 'background-color 150ms',
-            whiteSpace: 'nowrap',
           }}
           onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'rgba(37,211,102,0.06)' }}
           onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#FFFFFF' }}
@@ -444,8 +443,10 @@ export function PriceListView() {
       ) : viewMode === 'cards' ? (
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))',
           gap: 16,
+          width: '100%',
+          boxSizing: 'border-box',
         }}>
           {filtered.map(l => <LaptopCard key={l.id} laptop={l} />)}
         </div>

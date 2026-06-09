@@ -12,7 +12,7 @@ import { withSpecs, makeLaptopFuse } from '@/lib/fuzzy'
 import type { Laptop, LaptopInsert } from '@/types/database'
 
 const fmt = (n: number) => n.toLocaleString('en-PK')
-const CARD: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', padding: 16 }
+const CARD: React.CSSProperties = { backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.05)', padding: 16, width: '100%', boxSizing: 'border-box' }
 function storageLabel(gb: number) { return gb >= 1024 ? `${gb / 1024} TB` : `${gb} GB` }
 const COND: Record<string, { bg: string; text: string }> = {
   new:         { bg: '#D1FAE5', text: '#047857' },
@@ -175,8 +175,8 @@ export function LaptopsTab() {
                 </div>
 
                 {/* Price row */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #F0EEE8' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 20, fontSize: 13 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px solid #F0EEE8', flexWrap: 'wrap', gap: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, fontSize: 13 }}>
                     <div>
                       <span style={{ fontSize: 11, color: '#A1A1AA', display: 'block' }}>Cost</span>
                       <span style={{ fontWeight: 500 }}>PKR {fmt(laptop.cost_price)}</span>

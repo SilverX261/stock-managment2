@@ -43,7 +43,7 @@
   padding: 0;
 }
 
-html { height: 100%; font-size: 16px; }
+html { height: 100%; font-size: 16px; overflow-x: hidden; }
 
 body {
   min-height: 100%;
@@ -53,6 +53,9 @@ body {
   background-color: #FAFAF8;
   color: #3F3F46;
   line-height: 1.5;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 img, svg, video { display: block; max-width: 100%; }
@@ -106,10 +109,10 @@ h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
 }
 
 /* ── Page layout helpers (desktop defaults) ─────────────────── */
-.fc-page-wrap         { display: flex; flex-direction: column; height: 100%; }
-.fc-page-header       { padding: 20px 24px 16px; border-bottom: 1px solid #F0EEE8; background-color: #FFFFFF; flex-shrink: 0; }
-.fc-page-header-tabs  { padding: 20px 24px 0;    border-bottom: 1px solid #F0EEE8; background-color: #FFFFFF; flex-shrink: 0; }
-.fc-page-content      { flex: 1; padding: 16px 24px; overflow-y: auto; }
+.fc-page-wrap         { display: flex; flex-direction: column; height: 100%; width: 100%; max-width: 100%; box-sizing: border-box; overflow-x: hidden; }
+.fc-page-header       { padding: 20px 24px 16px; border-bottom: 1px solid #F0EEE8; background-color: #FFFFFF; flex-shrink: 0; width: 100%; box-sizing: border-box; word-break: break-word; overflow-wrap: break-word; }
+.fc-page-header-tabs  { padding: 20px 24px 0;    border-bottom: 1px solid #F0EEE8; background-color: #FFFFFF; flex-shrink: 0; width: 100%; box-sizing: border-box; }
+.fc-page-content      { flex: 1; padding: 16px 24px; overflow-y: auto; overflow-x: hidden; width: 100%; box-sizing: border-box; }
 
 /* Inventory / action toolbars */
 .fc-toolbar           { display: flex; align-items: center; justify-content: space-between; }
@@ -128,6 +131,10 @@ h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
     margin-left: 0 !important;
     padding-top: 56px !important;
     padding-bottom: 64px;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
 
   /* Tighter page padding on small screens */

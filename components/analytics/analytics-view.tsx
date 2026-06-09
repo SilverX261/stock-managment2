@@ -92,7 +92,7 @@ export function AnalyticsView() {
 
       <PeriodBarChart data={barData} view={chartView} onViewChange={setChartView} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(280px, 100%), 1fr))', gap: 16, width: '100%', boxSizing: 'border-box' }}>
         <BrandDonut title="Profit by Laptop Brand" data={brandProfit}
           formatValue={v => pkr(v)} centerLabel={pkr(brandProfit.reduce((s, d) => s + d.value, 0))} />
         <BrandDonut title="Units Sold by Laptop Brand" data={brandVolume}
