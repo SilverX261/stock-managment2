@@ -12,6 +12,30 @@
   ─────────────────────────────────────────────────────────────────
 */
 
+/* ── 0. CSS variable tokens (used by Tailwind bg-muted, text-primary, etc.) ── */
+:root {
+  --background:              60 5% 98%;      /* #FAFAF8 */
+  --foreground:              240 5% 26%;     /* #3F3F46 */
+  --card:                    0 0% 100%;      /* #FFFFFF */
+  --card-foreground:         240 5% 26%;
+  --popover:                 0 0% 100%;
+  --popover-foreground:      240 5% 26%;
+  --primary:                 25 95% 53%;     /* #F97316 orange */
+  --primary-foreground:      0 0% 100%;
+  --secondary:               40 18% 94%;     /* #F5F2EC warm grey */
+  --secondary-foreground:    240 5% 26%;
+  --muted:                   40 18% 94%;     /* #F5F2EC */
+  --muted-foreground:        240 4% 65%;     /* #A1A1AA */
+  --accent:                  40 18% 94%;     /* hover bg */
+  --accent-foreground:       240 5% 26%;
+  --destructive:             0 84% 60%;      /* #EF4444 */
+  --destructive-foreground:  0 0% 100%;
+  --border:                  40 17% 93%;     /* #F0EEE8 */
+  --input:                   240 6% 89%;     /* #E4E2DC */
+  --ring:                    25 95% 53%;     /* #F97316 */
+  --radius:                  0.5rem;
+}
+
 /* ── 1. Reset ──────────────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -105,3 +129,11 @@ h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
 
 /* Focus ring reset for Radix items */
 [data-radix-popper-content-wrapper] { z-index: 50 !important; }
+
+/* ── Utility: card-like border used in step-review ─────────── */
+.card-border {
+  background-color: #FFFFFF;
+  border: 1px solid #F0EEE8;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}

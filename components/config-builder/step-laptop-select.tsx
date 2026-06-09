@@ -133,7 +133,14 @@ export function StepLaptopSelect({ laptops, selected, onSelect }: Props) {
       {results.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '48px 0', color: '#A1A1AA' }}>
           <Monitor style={{ width: 40, height: 40, margin: '0 auto 8px', opacity: 0.4 }} />
-          <p style={{ fontSize: 13 }}>No results found — try a different search term</p>
+          <p style={{ fontSize: 13, fontWeight: 500, color: '#3F3F46' }}>
+            {laptops.length === 0 ? 'No laptops in inventory yet' : 'No results found'}
+          </p>
+          <p style={{ fontSize: 12, marginTop: 4 }}>
+            {laptops.length === 0
+              ? 'Add laptops in the Inventory page first'
+              : 'Try a different search term'}
+          </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
