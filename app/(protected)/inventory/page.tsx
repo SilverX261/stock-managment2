@@ -9,11 +9,11 @@ export default function InventoryPage() {
   const [tab, setTab] = useState<'laptops' | 'components'>('laptops')
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Header */}
-      <div style={{ padding: '20px 24px 0', borderBottom: '1px solid #F0EEE8', backgroundColor: '#FFFFFF', flexShrink: 0 }}>
+    <div className="fc-page-wrap">
+      {/* Header with tabs */}
+      <div className="fc-page-header-tabs">
         <h1 style={{ fontSize: '20px', fontWeight: 700, color: '#0A0A0A' }}>Inventory</h1>
-        <p style={{ fontSize: '13px', color: '#A1A1AA', marginTop: 3, marginBottom: 16 }}>Manage laptops and components</p>
+        <p style={{ fontSize: '13px', color: '#A1A1AA', marginTop: 3, marginBottom: 14 }}>Manage laptops and components</p>
 
         {/* Tab bar */}
         <div style={{ display: 'flex', gap: 4, marginBottom: -1 }}>
@@ -45,7 +45,7 @@ export default function InventoryPage() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: '16px 24px', overflowY: 'auto' }}>
+      <div className="fc-page-content">
         {tab === 'laptops' ? <LaptopsTab /> : <ComponentsTab />}
       </div>
     </div>

@@ -8,8 +8,8 @@ interface Props {
 
 export default function CustomerProfilePage({ params }: Props) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
-      <div style={{ flex: 1, padding: '16px 24px' }}>
+    <div className="fc-page-wrap">
+      <div className="fc-page-content" style={{ paddingTop: 16 }}>
         <CustomerProfile customerId={params.id} />
       </div>
     </div>

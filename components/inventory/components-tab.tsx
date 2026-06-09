@@ -65,11 +65,13 @@ export function ComponentsTab() {
 
   return (
     <div style={{ position: 'relative' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+      <div className="fc-toolbar" style={{ marginBottom: 16 }}>
         <p style={{ fontSize: 13, color: '#A1A1AA' }}>{loading ? 'Loading…' : `${components.length} component${components.length !== 1 ? 's' : ''}`}</p>
-        <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true) }}>
-          <Plus style={{ width: 14, height: 14 }} /> Add Component
-        </Button>
+        <div className="fc-toolbar-btns">
+          <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true) }}>
+            <Plus style={{ width: 14, height: 14 }} /> Add Component
+          </Button>
+        </div>
       </div>
 
       {error && <div style={{ marginBottom: 16, padding: '8px 12px', borderRadius: 8, backgroundColor: '#FEE2E2', color: '#B91C1C', fontSize: 13 }}>{error}</div>}

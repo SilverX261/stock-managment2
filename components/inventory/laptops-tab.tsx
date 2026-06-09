@@ -78,13 +78,13 @@ export function LaptopsTab() {
   return (
     <div style={{ position: 'relative' }}>
       {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+      <div className="fc-toolbar" style={{ marginBottom: 12 }}>
         <p style={{ fontSize: 13, color: '#A1A1AA' }}>
           {loading ? 'Loading…' : search.trim()
             ? `${displayed.length} of ${laptops.length} laptop${laptops.length !== 1 ? 's' : ''}`
             : `${laptops.length} laptop${laptops.length !== 1 ? 's' : ''}`}
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="fc-toolbar-btns">
           <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
             <FileSpreadsheet style={{ width: 14, height: 14 }} />
             Import Excel

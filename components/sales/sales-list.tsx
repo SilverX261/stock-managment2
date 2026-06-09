@@ -89,7 +89,7 @@ export function SalesList() {
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+      <div className="fc-list-toolbar">
         <div style={{ position: 'relative', flex: 1 }}>
           <Search style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 15, height: 15, color: '#A1A1AA' }} />
           <Input placeholder="Search by laptop, customer, phone…" value={query} onChange={e => setQuery(e.target.value)} style={{ paddingLeft: 36, height: 44 }} />

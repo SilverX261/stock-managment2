@@ -5,9 +5,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Package, Settings2, ShoppingCart,
-  Users, BarChart3, Settings, WifiOff, Tags, Search, QrCode,
+  Users, BarChart3, Settings, WifiOff, Tags, QrCode,
 } from 'lucide-react'
-import { GlobalSearch } from '@/components/search/global-search'
 
 /* ── Nav items ─────────────────────────────────────────────────── */
 const NAV = [
@@ -21,7 +20,7 @@ const NAV = [
   { href: '/price-list',     label: 'Price List', Icon: Tags },
   { href: '/settings',       label: 'Settings',   Icon: Settings },
 ]
-const BOTTOM = ['/dashboard', '/inventory', '/config-builder', '/sales', '/scan']
+const BOTTOM = ['/dashboard', '/inventory', '/config-builder', '/sales', '/customers']
 
 /* ── Colours (used repeatedly) ─────────────────────────────────── */
 const BG     = '#0A0A0A'
@@ -37,7 +36,6 @@ export function AppNav() {
   const pathname            = usePathname()
   const router              = useRouter()
   const [online,  setOnline]  = useState(true)
-  const [search,  setSearch]  = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -48,14 +46,6 @@ export function AppNav() {
     window.addEventListener('online',  up)
     window.addEventListener('offline', down)
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down) }
-  }, [])
-
-  useEffect(() => {
-    const fn = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); setSearch(true) }
-    }
-    window.addEventListener('keydown', fn)
-    return () => window.removeEventListener('keydown', fn)
   }, [])
 
   return (
@@ -108,36 +98,6 @@ export function AppNav() {
 
         {/* Divider */}
         <div style={{ height: 1, backgroundColor: DIM, margin: '0 20px 14px', flexShrink: 0 }} />
-
-        {/* Search button */}
-        <div style={{ padding: '0 12px 8px', flexShrink: 0 }}>
-          <button
-            onClick={() => setSearch(true)}
-            style={{
-              display:         'flex', alignItems: 'center', gap: 8,
-              width:           '100%', padding: '7px 10px',
-              borderRadius:    8, cursor: 'pointer',
-              backgroundColor: DIM, color: MUTED,
-              fontSize: 12, border: 'none',
-              transition:      'background-color 150ms',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'rgba(255,255,255,0.09)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = DIM }}
-          >
-            <Search style={{ width: 13, height: 13, flexShrink: 0 }} />
-            <span style={{ flex: 1, textAlign: 'left' }}>Search…</span>
-            <kbd style={{
-              fontSize: 10, borderRadius: 4, padding: '1px 5px',
-              backgroundColor: 'rgba(255,255,255,0.07)', color: 'rgba(161,161,170,0.6)',
-              fontFamily: 'inherit', border: 'none',
-            }}>⌃K</kbd>
-          </button>
-        </div>
-
-        {/* Section label */}
-        <p style={{ padding: '0 20px 6px', fontSize: 10, fontWeight: 600, color: 'rgba(161,161,170,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', flexShrink: 0 }}>
-          Navigation
-        </p>
 
         {/* Nav links — only this section scrolls */}
         <nav style={{ flex: 1, minHeight: 0, padding: '0 10px', paddingBottom: 16, display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
@@ -195,20 +155,6 @@ export function AppNav() {
           >
             <QrCode style={{ width: 17, height: 17 }} />
           </button>
-          <button
-            onClick={() => setSearch(true)}
-            style={{
-              width: 32, height: 32, borderRadius: 8, border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              backgroundColor: 'transparent', color: MUTED,
-              transition: 'background-color 150ms',
-            }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = '#FAFAF8' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent' }}
-            aria-label="Search"
-          >
-            <Search style={{ width: 17, height: 17 }} />
-          </button>
         </div>
       </header>
 
@@ -257,7 +203,6 @@ export function AppNav() {
         })}
       </nav>
 
-      <GlobalSearch open={search} onClose={() => setSearch(false)} />
     </>
   )
 }

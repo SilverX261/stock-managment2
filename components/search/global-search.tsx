@@ -167,7 +167,6 @@ export function GlobalSearch({ open, onClose }: { open: boolean; onClose: () => 
   return (
     <div
       className="fixed inset-0 z-50 flex items-start justify-center pt-[8vh] px-4"
-      style={{ backgroundColor: 'rgba(10,10,10,0.55)', backdropFilter: 'blur(4px)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div
