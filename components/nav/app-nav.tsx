@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import {
   LayoutDashboard, Package, Settings2, ShoppingCart,
   Users, BarChart3, Settings, WifiOff, Tags, QrCode,
+  MoreHorizontal,
 } from 'lucide-react'
 
 /* ── Nav items ─────────────────────────────────────────────────── */
@@ -21,6 +22,7 @@ const NAV = [
   { href: '/settings',       label: 'Settings',   Icon: Settings },
 ]
 const BOTTOM = ['/dashboard', '/inventory', '/config-builder', '/sales', '/customers']
+const MORE   = ['/analytics', '/price-list', '/scan', '/settings']
 
 /* ── Colours (used repeatedly) ─────────────────────────────────── */
 const BG     = '#0A0A0A'
@@ -33,10 +35,11 @@ function isActive(pathname: string, href: string) {
 }
 
 export function AppNav() {
-  const pathname            = usePathname()
-  const router              = useRouter()
-  const [online,  setOnline]  = useState(true)
-  const [mounted, setMounted] = useState(false)
+  const pathname              = usePathname()
+  const router                = useRouter()
+  const [online,     setOnline]     = useState(true)
+  const [mounted,    setMounted]    = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -200,7 +203,117 @@ export function AppNav() {
             </Link>
           )
         })}
+
+        {/* More button — 6th tab */}
+        {(() => {
+          const moreActive = MORE.some(href => isActive(pathname, href))
+          return (
+            <button
+              onClick={() => setDrawerOpen(true)}
+              style={{
+                flex:           1,
+                display:        'flex',
+                flexDirection:  'column',
+                alignItems:     'center',
+                justifyContent: 'center',
+                gap:            3,
+                color:          moreActive ? ORANGE : MUTED,
+                fontSize:       10,
+                fontWeight:     600,
+                padding:        '6px 0',
+                background:     'none',
+                border:         'none',
+                cursor:         'pointer',
+                transition:     'color 150ms',
+              }}
+              aria-label="More pages"
+            >
+              <MoreHorizontal style={{ width: 20, height: 20 }} />
+              More
+            </button>
+          )
+        })()}
       </nav>
+
+      {/* ═══════════════════════════════════════════════════════
+          MORE DRAWER
+          ═══════════════════════════════════════════════════════ */}
+      {drawerOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            onClick={() => setDrawerOpen(false)}
+            style={{
+              position:        'fixed', inset: 0, zIndex: 40,
+              backgroundColor: 'rgba(0,0,0,0.45)',
+            }}
+          />
+
+          {/* Drawer sheet */}
+          <div
+            style={{
+              position:        'fixed', bottom: 0, left: 0, right: 0, zIndex: 50,
+              backgroundColor: '#FFFFFF',
+              borderRadius:    '20px 20px 0 0',
+              boxShadow:       '0 -8px 32px rgba(0,0,0,0.14)',
+              paddingBottom:   'env(safe-area-inset-bottom, 12px)',
+            }}
+          >
+            {/* Handle bar */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 4px' }}>
+              <div style={{ width: 36, height: 4, borderRadius: 99, backgroundColor: '#E4E4E7' }} />
+            </div>
+
+            {/* Label */}
+            <p style={{
+              fontSize: 11, fontWeight: 700, letterSpacing: '0.08em',
+              color: '#A1A1AA', textTransform: 'uppercase',
+              padding: '8px 20px 6px',
+            }}>
+              More
+            </p>
+
+            {/* Rows */}
+            {NAV.filter(n => MORE.includes(n.href)).map(({ href, label, Icon }) => {
+              const active = isActive(pathname, href)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setDrawerOpen(false)}
+                  style={{
+                    display:        'flex',
+                    alignItems:     'center',
+                    gap:            14,
+                    padding:        '14px 20px',
+                    textDecoration: 'none',
+                    color:          active ? ORANGE : '#18181B',
+                    borderTop:      '1px solid #F4F4F5',
+                    backgroundColor: active ? '#FFF7ED' : 'transparent',
+                    transition:     'background-color 120ms',
+                  }}
+                >
+                  <div style={{
+                    width: 38, height: 38, borderRadius: 10,
+                    backgroundColor: active ? '#FFEDD5' : '#F4F4F5',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    <Icon style={{ width: 18, height: 18, color: active ? ORANGE : '#71717A' }} />
+                  </div>
+                  <span style={{ fontSize: 15, fontWeight: 600 }}>{label}</span>
+                  {/* Chevron */}
+                  <svg style={{ marginLeft: 'auto', color: '#D4D4D8' }} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+              )
+            })}
+
+            <div style={{ height: 12 }} />
+          </div>
+        </>
+      )}
 
     </>
   )
