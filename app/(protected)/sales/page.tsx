@@ -1,5 +1,6 @@
 import { SalesList } from '@/components/sales/sales-list'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Sales — Fine Computers' }
 
 export default function SalesPage() {

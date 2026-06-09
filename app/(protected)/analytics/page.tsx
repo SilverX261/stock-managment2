@@ -1,5 +1,6 @@
 import { AnalyticsView } from '@/components/analytics/analytics-view'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Analytics — Fine Computers' }
 
 export default function AnalyticsPage() {

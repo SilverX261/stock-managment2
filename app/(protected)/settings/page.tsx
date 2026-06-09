@@ -1,5 +1,6 @@
 import { SettingsView } from '@/components/settings/settings-view'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Settings — Fine Computers' }
 
 export default function SettingsPage() {

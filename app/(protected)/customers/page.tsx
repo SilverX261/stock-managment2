@@ -1,5 +1,6 @@
 import { CustomersList } from '@/components/customers/customers-list'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Customers — Fine Computers' }
 
 export default function CustomersPage() {

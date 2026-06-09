@@ -1,5 +1,6 @@
 import { ConfigBuilder } from '@/components/config-builder/config-builder'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Config Builder — Fine Computers' }
 
 export default function ConfigBuilderPage() {

@@ -1,5 +1,6 @@
 import { PriceListView } from '@/components/price-list/price-list-view'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Price List — Fine Computers' }
 
 export default function PriceListPage() {

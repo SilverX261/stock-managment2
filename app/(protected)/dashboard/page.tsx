@@ -1,5 +1,6 @@
 import { DashboardView } from '@/components/dashboard/dashboard-view'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Dashboard — Fine Computers' }
 
 export default function DashboardPage() {

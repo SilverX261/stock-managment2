@@ -1,5 +1,6 @@
 import { CustomerProfile } from '@/components/customers/customer-profile'
 
+export const dynamic = 'force-dynamic'
 export const metadata = { title: 'Customer Profile — Fine Computers' }
 
 interface Props {

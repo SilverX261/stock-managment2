@@ -1,5 +1,7 @@
 import { SerialLookup } from '@/components/scan/serial-lookup'
 
+export const dynamic = 'force-dynamic'
+
 export default function ScanPage() {
   return (
     <div className="fc-page-wrap">
