@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <rect x="48" y="48" width="416" height="416" rx="80" fill="#1e293b"/>
+  <!-- Monitor screen -->
+  <rect x="106" y="130" width="300" height="190" rx="14" fill="#0ea5e9" opacity="0.15"/>
+  <rect x="106" y="130" width="300" height="190" rx="14" fill="none" stroke="#38bdf8" stroke-width="12"/>
+  <!-- Screen content lines -->
+  <rect x="136" y="165" width="120" height="10" rx="5" fill="#38bdf8" opacity="0.8"/>
+  <rect x="136" y="188" width="80" height="8" rx="4" fill="#38bdf8" opacity="0.5"/>
+  <rect x="136" y="210" width="100" height="8" rx="4" fill="#38bdf8" opacity="0.5"/>
+  <!-- Monitor stand -->
+  <rect x="232" y="320" width="48" height="38" rx="4" fill="#38bdf8" opacity="0.5"/>
+  <rect x="196" y="356" width="120" height="12" rx="6" fill="#38bdf8" opacity="0.6"/>
+  <!-- FC text -->
+  <text x="256" y="460" font-family="system-ui,-apple-system,sans-serif" font-size="62" font-weight="800" fill="#f8fafc" text-anchor="middle" letter-spacing="4">Fine Computers</text>
+</svg>
