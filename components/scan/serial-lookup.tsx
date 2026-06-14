@@ -84,7 +84,6 @@ function parseSerialCandidates(text: string): string[] {
     }
   }
 
-  // Fallback: standalone mixed alphanumeric 8-20 chars
   if (found.size === 0) {
     const sa = /\b([A-Z0-9]{8,20})\b/g
     let m: RegExpExecArray | null
@@ -118,11 +117,7 @@ export function SerialLookup() {
 
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
-  const onScannedRef = useRef<(v: string) => void>(() => {})
   const inputRef = useRef<HTMLInputElement>(null)
-
-  // Safe alias mapping to avoid React Hook lint error in event handlers
-  const handleSelectCandidate = useOcrCandidate
 
   const doLookup = useCallback(async (serial: string) => {
     const q = serial.trim()
@@ -154,6 +149,17 @@ export function SerialLookup() {
     e.preventDefault()
     doLookup(query)
   }
+
+  // Pure callback function to select the candidate string
+  const handleSelectCandidate = useCallback((value: string) => {
+    setQuery(value)
+    setOcrActive(false)
+    setOcrStatus('idle')
+    setOcrText('')
+    setOcrCandidates([])
+    setShowRawText(false)
+    doLookup(value)
+  }, [doLookup])
 
   // Barcode scanner lifecycle
   useEffect(() => {
@@ -216,12 +222,6 @@ export function SerialLookup() {
     }
   }, [scanActive, doLookup])
 
-  onScannedRef.current = (v: string) => {
-    setQuery(v)
-    setScanActive(false)
-    doLookup(v)
-  }
-
   // OCR camera lifecycle
   useEffect(() => {
     if (!ocrActive) {
@@ -270,13 +270,11 @@ export function SerialLookup() {
     const video = videoRef.current
     if (!video || ocrStatus !== 'live') return
 
-    // Draw frame to canvas before stopping stream
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth || 1280
     canvas.height = video.videoHeight || 720
     canvas.getContext('2d')!.drawImage(video, 0, 0)
 
-    // Stop stream
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop())
       streamRef.current = null
@@ -295,19 +293,8 @@ export function SerialLookup() {
     } catch {
       setOcrError('Failed to read text from image. Try again with better lighting.')
       setOcrStatus('live')
-      // Restart camera for retry
       setOcrRetry(n => n + 1)
     }
-  }
-
-  function useOcrCandidate(value: string) {
-    setQuery(value)
-    setOcrActive(false)
-    setOcrStatus('idle')
-    setOcrText('')
-    setOcrCandidates([])
-    setShowRawText(false)
-    doLookup(value)
   }
 
   function handleScanAgain() {
@@ -423,7 +410,6 @@ export function SerialLookup() {
               <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Starting camera…</p>
             </div>
           )}
-          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
           <video
             ref={videoRef}
             autoPlay
@@ -482,7 +468,6 @@ export function SerialLookup() {
           borderRadius: 14, border: '1px solid #F0EEE8', padding: 18,
           backgroundColor: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
         }}>
-          {/* Header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <ScanText style={{ width: 16, height: 16, color: '#F97316' }} />
@@ -501,7 +486,6 @@ export function SerialLookup() {
             </div>
           </div>
 
-          {/* Candidates */}
           {ocrCandidates.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <p style={{ fontSize: 11, fontWeight: 600, color: '#A1A1AA', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
@@ -533,7 +517,6 @@ export function SerialLookup() {
             </div>
           )}
 
-          {/* Raw extracted text toggle */}
           <div>
             <button
               type="button"
@@ -556,7 +539,6 @@ export function SerialLookup() {
         </div>
       )}
 
-      {/* Errors */}
       {(scanError || ocrError) && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 14px', backgroundColor: '#FEE2E2', borderRadius: 10 }}>
           <AlertCircle style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0, marginTop: 1 }} />
@@ -564,7 +546,6 @@ export function SerialLookup() {
         </div>
       )}
 
-      {/* Not found */}
       {result === 'not-found' && (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, padding: '40px 24px', borderRadius: 16, border: '1px dashed #E4E2DC', textAlign: 'center' }}>
           <PackageX style={{ width: 40, height: 40, color: '#D4D2CB' }} />
@@ -577,11 +558,8 @@ export function SerialLookup() {
         </div>
       )}
 
-      {/* Laptop info card */}
       {result && result !== 'not-found' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-          {/* Status + name */}
           <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 14 }}>
               <div>
@@ -610,7 +588,7 @@ export function SerialLookup() {
                 </div>
                 <span style={{
                   padding: '2px 8px', borderRadius: 99, fontSize: 10, fontWeight: 600,
-                  textTransform: 'capitalize' as const,
+                  textTransform: 'capitalize',
                   backgroundColor: COND[result.condition]?.bg ?? '#F5F2EC',
                   color: COND[result.condition]?.text ?? '#3F3F46',
                 }}>
@@ -669,7 +647,6 @@ export function SerialLookup() {
             )}
           </div>
 
-          {/* Sale info */}
           {mostRecentSale && (
             <div style={{ backgroundColor: '#fff', border: '1px solid #F0EEE8', borderRadius: 16, padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
               <p style={{ fontSize: 12, fontWeight: 600, color: '#A1A1AA', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>
