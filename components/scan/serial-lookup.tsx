@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import {
   Camera, Search, CheckCircle2, XCircle, Monitor, MemoryStick,
   HardDrive, ShieldCheck, Shield, User, Phone, Calendar, Loader2,
-  PackageX, AlertCircle,
+  PackageX, AlertCircle, ScanText, ArrowRight, X, RotateCcw,
 } from 'lucide-react'
 
 const fmt = (n: number) => n.toLocaleString('en-PK')
@@ -64,14 +64,60 @@ function warrantyExpiryDate(saleDateStr: string, days: number): Date {
   return d
 }
 
+function parseSerialCandidates(text: string): string[] {
+  const found = new Set<string>()
+  const upper = text.replace(/\s+/g, ' ').toUpperCase()
+
+  const labeled = [
+    /S[\/.]?N[#: ]+([A-Z0-9][A-Z0-9\-]{3,19})/g,
+    /SERIAL\s*(?:NUMBER|NO\.?|NUM\.?|#)?[: ]+([A-Z0-9][A-Z0-9\-]{3,19})/g,
+    /SNH[ ]+([A-Z0-9][A-Z0-9\-]{3,19})/g,
+    /SERVICE\s*TAG[: ]+([A-Z0-9]{4,12})/g,
+    /P\/N[: ]+([A-Z0-9][A-Z0-9\-]{5,19})/g,
+  ]
+
+  for (const pat of labeled) {
+    let m: RegExpExecArray | null
+    while ((m = pat.exec(upper)) !== null) {
+      const c = m[1].replace(/[^A-Z0-9\-]+$/, '')
+      if (c.length >= 4) found.add(c)
+    }
+  }
+
+  // Fallback: standalone mixed alphanumeric 8-20 chars
+  if (found.size === 0) {
+    const sa = /\b([A-Z0-9]{8,20})\b/g
+    let m: RegExpExecArray | null
+    while ((m = sa.exec(upper)) !== null) {
+      if (/[A-Z]/.test(m[1]) && /[0-9]/.test(m[1])) found.add(m[1])
+    }
+  }
+
+  return Array.from(found).slice(0, 6)
+}
+
 export function SerialLookup() {
   const supabase = useMemo(() => createClient(), [])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<LaptopResult | null | 'not-found'>(null)
+
+  // Barcode scanner state
   const [scanActive, setScanActive] = useState(false)
   const [scanError, setScanError] = useState<string | null>(null)
   const [scanStatus, setScanStatus] = useState<'idle' | 'starting' | 'scanning'>('idle')
+
+  // OCR state
+  const [ocrActive, setOcrActive] = useState(false)
+  const [ocrRetry, setOcrRetry] = useState(0)
+  const [ocrStatus, setOcrStatus] = useState<'idle' | 'starting' | 'live' | 'processing' | 'done'>('idle')
+  const [ocrError, setOcrError] = useState<string | null>(null)
+  const [ocrText, setOcrText] = useState('')
+  const [ocrCandidates, setOcrCandidates] = useState<string[]>([])
+  const [showRawText, setShowRawText] = useState(false)
+
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
   const onScannedRef = useRef<(v: string) => void>(() => {})
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -106,7 +152,7 @@ export function SerialLookup() {
     doLookup(query)
   }
 
-  // Camera scanner logic
+  // Barcode scanner lifecycle
   useEffect(() => {
     if (!scanActive) {
       setScanError(null)
@@ -173,7 +219,112 @@ export function SerialLookup() {
     doLookup(v)
   }
 
-  // Derive most recent sale from sale_items
+  // OCR camera lifecycle
+  useEffect(() => {
+    if (!ocrActive) {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop())
+        streamRef.current = null
+      }
+      return
+    }
+
+    setOcrStatus('starting')
+    setOcrError(null)
+    let mounted = true
+
+    ;(async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+        })
+        if (!mounted) { stream.getTracks().forEach(t => t.stop()); return }
+        streamRef.current = stream
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream
+          await videoRef.current.play().catch(() => {})
+        }
+        if (mounted) setOcrStatus('live')
+      } catch {
+        if (mounted) {
+          setOcrError('Camera unavailable. Check camera permissions in your browser.')
+          setOcrStatus('idle')
+          setOcrActive(false)
+        }
+      }
+    })()
+
+    return () => {
+      mounted = false
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop())
+        streamRef.current = null
+      }
+    }
+  }, [ocrActive, ocrRetry])
+
+  async function handleCaptureAndRead() {
+    const video = videoRef.current
+    if (!video || ocrStatus !== 'live') return
+
+    // Draw frame to canvas before stopping stream
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    canvas.getContext('2d')!.drawImage(video, 0, 0)
+
+    // Stop stream
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop())
+      streamRef.current = null
+    }
+    setOcrStatus('processing')
+    setOcrError(null)
+
+    try {
+      const TesseractModule = await import('tesseract.js')
+      const recognize = (TesseractModule as unknown as { recognize: (img: unknown, lang: string, opts?: unknown) => Promise<{ data: { text: string } }> }).recognize
+      const { data } = await recognize(canvas, 'eng', { logger: () => {} })
+      const text = data.text.trim()
+      setOcrText(text)
+      setOcrCandidates(parseSerialCandidates(text))
+      setOcrStatus('done')
+    } catch {
+      setOcrError('Failed to read text from image. Try again with better lighting.')
+      setOcrStatus('live')
+      // Restart camera for retry
+      setOcrRetry(n => n + 1)
+    }
+  }
+
+  function useOcrCandidate(value: string) {
+    setQuery(value)
+    setOcrActive(false)
+    setOcrStatus('idle')
+    setOcrText('')
+    setOcrCandidates([])
+    setShowRawText(false)
+    doLookup(value)
+  }
+
+  function handleScanAgain() {
+    setOcrText('')
+    setOcrCandidates([])
+    setOcrStatus('idle')
+    setOcrError(null)
+    setShowRawText(false)
+    setOcrRetry(n => n + 1)
+  }
+
+  function stopOcr() {
+    setOcrActive(false)
+    setOcrStatus('idle')
+    setOcrText('')
+    setOcrCandidates([])
+    setOcrError(null)
+    setShowRawText(false)
+  }
+
   const mostRecentSale: SaleInfo | null = useMemo(() => {
     if (!result || result === 'not-found') return null
     const sales = result.sale_items
@@ -184,6 +335,7 @@ export function SerialLookup() {
   }, [result])
 
   const isSold = result && result !== 'not-found' && result.quantity <= 0
+  const ocrIsOpen = ocrActive || ocrStatus === 'processing' || ocrStatus === 'done'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -199,27 +351,49 @@ export function SerialLookup() {
             style={{ height: 48, paddingLeft: 36, fontSize: 14 }}
           />
         </div>
+        {/* Barcode scan button */}
         <Button
           type="button"
           variant="outline"
-          style={{ height: 48, paddingLeft: 16, paddingRight: 16, gap: 6, flexShrink: 0 }}
-          onClick={() => setScanActive(p => !p)}
+          style={{ height: 48, paddingLeft: 14, paddingRight: 14, gap: 6, flexShrink: 0 }}
+          onClick={() => {
+            if (ocrIsOpen) stopOcr()
+            setScanActive(p => !p)
+          }}
         >
           <Camera style={{ width: 16, height: 16, color: scanActive ? '#F97316' : undefined }} />
           {scanActive ? 'Stop' : 'Scan'}
+        </Button>
+        {/* OCR button */}
+        <Button
+          type="button"
+          variant="outline"
+          style={{ height: 48, paddingLeft: 14, paddingRight: 14, gap: 6, flexShrink: 0 }}
+          onClick={() => {
+            if (scanActive) setScanActive(false)
+            if (ocrIsOpen) {
+              stopOcr()
+            } else {
+              setOcrActive(true)
+              setOcrRetry(n => n + 1)
+            }
+          }}
+        >
+          <ScanText style={{ width: 16, height: 16, color: ocrIsOpen ? '#F97316' : undefined }} />
+          {ocrIsOpen ? 'Stop' : 'OCR'}
         </Button>
         <Button type="submit" style={{ height: 48, paddingLeft: 18, paddingRight: 18 }} disabled={loading || !query.trim()}>
           {loading ? <Loader2 style={{ width: 15, height: 15 }} className="fc-spin" /> : 'Look up'}
         </Button>
       </form>
 
-      {/* Camera viewfinder */}
+      {/* Barcode scanner viewfinder */}
       {scanActive && (
         <div style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', position: 'relative' }}>
           {scanStatus === 'starting' && (
             <div style={{
               position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: 10, zIndex: 2,
+              alignItems: 'center', justifyContent: 'center', gap: 10, zIndex: 2, minHeight: 250,
             }}>
               <div className="fc-spin" style={{ width: 28, height: 28, border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#F97316', borderRadius: '50%' }} />
               <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Starting camera…</p>
@@ -234,10 +408,156 @@ export function SerialLookup() {
         </div>
       )}
 
-      {scanError && (
+      {/* OCR camera viewfinder */}
+      {ocrActive && (ocrStatus === 'starting' || ocrStatus === 'live') && (
+        <div style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: '#0A0A0A', border: '1px solid #1A1A1A', position: 'relative' }}>
+          {ocrStatus === 'starting' && (
+            <div style={{
+              minHeight: 260, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+            }}>
+              <div className="fc-spin" style={{ width: 28, height: 28, border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#F97316', borderRadius: '50%' }} />
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Starting camera…</p>
+            </div>
+          )}
+          {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+          <video
+            ref={videoRef}
+            autoPlay
+            playsInline
+            muted
+            style={{
+              width: '100%',
+              display: ocrStatus === 'live' ? 'block' : 'none',
+              maxHeight: 340,
+              objectFit: 'cover',
+            }}
+          />
+          {ocrStatus === 'live' && (
+            <div style={{
+              padding: '10px 14px', backgroundColor: 'rgba(0,0,0,0.72)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+            }}>
+              <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', lineHeight: 1.4 }}>
+                Point camera at the serial number sticker, then tap Capture
+              </p>
+              <Button
+                type="button"
+                onClick={handleCaptureAndRead}
+                style={{
+                  height: 40, paddingLeft: 16, paddingRight: 16, fontSize: 13,
+                  backgroundColor: '#F97316', color: '#fff', border: 'none',
+                  flexShrink: 0, gap: 6,
+                }}
+              >
+                <ScanText style={{ width: 14, height: 14 }} />
+                Capture &amp; Read
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* OCR processing spinner */}
+      {ocrStatus === 'processing' && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+          padding: '32px 24px', borderRadius: 12, backgroundColor: '#FAFAF8', border: '1px solid #F0EEE8',
+        }}>
+          <Loader2 style={{ width: 30, height: 30, color: '#F97316' }} className="fc-spin" />
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#3F3F46' }}>Reading sticker…</p>
+            <p style={{ fontSize: 12, color: '#A1A1AA', marginTop: 3 }}>OCR engine is extracting text from the image</p>
+          </div>
+        </div>
+      )}
+
+      {/* OCR results */}
+      {ocrStatus === 'done' && (
+        <div style={{
+          display: 'flex', flexDirection: 'column', gap: 14,
+          borderRadius: 14, border: '1px solid #F0EEE8', padding: 18,
+          backgroundColor: '#fff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <ScanText style={{ width: 16, height: 16, color: '#F97316' }} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: '#0A0A0A' }}>Text found on sticker</p>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <Button type="button" variant="outline" onClick={handleScanAgain}
+                style={{ height: 32, paddingLeft: 12, paddingRight: 12, fontSize: 12, gap: 5 }}>
+                <RotateCcw style={{ width: 12, height: 12 }} />
+                Scan again
+              </Button>
+              <Button type="button" variant="ghost" onClick={stopOcr}
+                style={{ height: 32, paddingLeft: 8, paddingRight: 8, color: '#A1A1AA' }}>
+                <X style={{ width: 14, height: 14 }} />
+              </Button>
+            </div>
+          </div>
+
+          {/* Candidates */}
+          {ocrCandidates.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#A1A1AA', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                Detected serial numbers — tap to use
+              </p>
+              {ocrCandidates.map(c => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => useOcrCandidate(c)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E4E2DC',
+                    backgroundColor: '#FAFAF8', cursor: 'pointer', textAlign: 'left',
+                  }}
+                >
+                  <span style={{ fontFamily: 'monospace', fontSize: 15, fontWeight: 600, color: '#0A0A0A', letterSpacing: '0.04em' }}>{c}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#F97316', fontSize: 12, fontWeight: 600, flexShrink: 0 }}>
+                    Use this <ArrowRight style={{ width: 12, height: 12 }} />
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div style={{ padding: '12px 14px', backgroundColor: '#FEF3C7', borderRadius: 10 }}>
+              <p style={{ fontSize: 13, color: '#92400E', lineHeight: 1.5 }}>
+                No serial number pattern detected. Try improving lighting, holding the camera steady, or type the serial number manually below.
+              </p>
+            </div>
+          )}
+
+          {/* Raw extracted text toggle */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowRawText(p => !p)}
+              style={{ fontSize: 12, color: '#A1A1AA', cursor: 'pointer', background: 'none', border: 'none', padding: 0, textDecoration: 'underline' }}
+            >
+              {showRawText ? '▲ Hide' : '▼ Show'} all extracted text
+            </button>
+            {showRawText && (
+              <pre style={{
+                marginTop: 8, padding: '10px 12px', backgroundColor: '#FAFAF8', borderRadius: 8,
+                fontSize: 11, color: '#3F3F46', whiteSpace: 'pre-wrap', wordBreak: 'break-all',
+                lineHeight: 1.6, border: '1px solid #F0EEE8', maxHeight: 180, overflowY: 'auto',
+                fontFamily: 'monospace',
+              }}>
+                {ocrText || '(no text extracted)'}
+              </pre>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Errors */}
+      {(scanError || ocrError) && (
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', padding: '10px 14px', backgroundColor: '#FEE2E2', borderRadius: 10 }}>
           <AlertCircle style={{ width: 14, height: 14, color: '#EF4444', flexShrink: 0, marginTop: 1 }} />
-          <p style={{ fontSize: 13, color: '#B91C1C' }}>{scanError}</p>
+          <p style={{ fontSize: 13, color: '#B91C1C' }}>{scanError || ocrError}</p>
         </div>
       )}
 
@@ -273,7 +593,6 @@ export function SerialLookup() {
                 </p>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-                {/* Stock status */}
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 99, fontSize: 12, fontWeight: 600,
                   ...(isSold
@@ -286,9 +605,7 @@ export function SerialLookup() {
                   }
                   {isSold ? 'Sold' : 'In Stock'}
                 </div>
-                {/* Condition */}
                 <span style={{
-                  ...COND[result.condition] ?? { bg: '#F5F2EC', text: '#3F3F46' },
                   padding: '2px 8px', borderRadius: 99, fontSize: 10, fontWeight: 600,
                   textTransform: 'capitalize' as const,
                   backgroundColor: COND[result.condition]?.bg ?? '#F5F2EC',
@@ -299,7 +616,6 @@ export function SerialLookup() {
               </div>
             </div>
 
-            {/* Specs grid */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 20px', fontSize: 12, color: '#3F3F46', borderTop: '1px solid #F0EEE8', paddingTop: 12 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <MemoryStick style={{ width: 12, height: 12, color: '#A1A1AA' }} />
@@ -322,7 +638,6 @@ export function SerialLookup() {
               )}
             </div>
 
-            {/* Pricing */}
             <div style={{ display: 'flex', gap: 24, marginTop: 12, paddingTop: 12, borderTop: '1px solid #F0EEE8', fontSize: 13 }}>
               <div>
                 <p style={{ fontSize: 10, color: '#A1A1AA', marginBottom: 2 }}>Cost Price</p>
@@ -395,7 +710,6 @@ export function SerialLookup() {
                 </div>
               </div>
 
-              {/* Warranty */}
               {mostRecentSale.warranty_days > 0 && (() => {
                 const expiry = warrantyExpiryDate(mostRecentSale.sale_date, mostRecentSale.warranty_days)
                 const isValid = expiry > new Date()
@@ -437,7 +751,6 @@ export function SerialLookup() {
             </div>
           )}
 
-          {/* No sale record yet */}
           {!mostRecentSale && result.quantity > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', backgroundColor: '#FAFAF8', borderRadius: 12, border: '1px solid #F0EEE8' }}>
               <CheckCircle2 style={{ width: 16, height: 16, color: '#059669', flexShrink: 0 }} />
