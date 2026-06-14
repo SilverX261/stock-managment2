@@ -121,6 +121,9 @@ export function SerialLookup() {
   const onScannedRef = useRef<(v: string) => void>(() => {})
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Safe alias mapping to avoid React Hook lint error in event handlers
+  const handleSelectCandidate = useOcrCandidate
+
   const doLookup = useCallback(async (serial: string) => {
     const q = serial.trim()
     if (!q) return
@@ -508,7 +511,7 @@ export function SerialLookup() {
                 <button
                   key={c}
                   type="button"
-                  onClick={() => useOcrCandidate(c)}
+                  onClick={() => handleSelectCandidate(c)}
                   style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '11px 14px', borderRadius: 10, border: '1.5px solid #E4E2DC',
